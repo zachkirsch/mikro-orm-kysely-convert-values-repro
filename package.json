@@ -1,0 +1,25 @@
+{
+  "name": "@mikro-orm/reproduction",
+  "private": true,
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "vitest run",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "author": "Martin Adamek",
+  "license": "MIT",
+  "dependencies": {
+    "@mikro-orm/core": "next",
+    "@mikro-orm/decorators": "next",
+    "@mikro-orm/sqlite": "next",
+    "kysely": "^0.28.7",
+    "reflect-metadata": "^0.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "typescript": "^5.8.0",
+    "vitest": "^4.1.0"
+  }
+}
