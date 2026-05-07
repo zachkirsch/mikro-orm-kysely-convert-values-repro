@@ -1,6 +1,6 @@
 # `getKysely({ convertValues: true })` does not apply `convertToJSValueSQL` for custom Types
 
-Issue: mikro-orm/mikro-orm#TODO
+Issue: https://github.com/mikro-orm/mikro-orm/issues/7679
 
 Repro:
 
