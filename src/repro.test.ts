@@ -5,7 +5,8 @@ import {
   Property,
   ReflectMetadataProvider,
 } from "@mikro-orm/decorators/legacy";
-import { MikroORM, Type } from "@mikro-orm/sqlite";
+import { MikroORM, raw, Type } from "@mikro-orm/sqlite";
+import type { InferResult } from "kysely";
 
 class UuidBlobType extends Type<string | undefined, string | undefined> {
   convertToDatabaseValue(value: string | undefined): string | undefined {
@@ -49,7 +50,7 @@ class User {
 
 const SEED_UUID = "11111111-2222-3333-4444-555555555555";
 
-test("getKysely({ convertValues: true }) applies convertToJSValueSQL", async () => {
+async function setupOrm() {
   const orm = await MikroORM.init({
     dbName: ":memory:",
     entities: [User],
@@ -61,22 +62,29 @@ test("getKysely({ convertValues: true }) applies convertToJSValueSQL", async () 
   orm.em.create(User, { uuid: SEED_UUID });
   await orm.em.flush();
   orm.em.clear();
+  return orm;
+}
 
-  const kysely = orm.em.fork().getKysely<{
-    user: { id: number; uuid: string };
-  }>({
+function getKysely(em: ReturnType<MikroORM["em"]["fork"]>) {
+  return em.getKysely<{ user: { id: number; uuid: string } }>({
     convertValues: true,
     tableNamingStrategy: "table",
     columnNamingStrategy: "column",
   });
+}
 
-  const [row] = await kysely
+test("em.execute(raw(query)): bare column — wrap applied, result transform skipped", async () => {
+  const orm = await setupOrm();
+
+  const em = orm.em.fork();
+  const query = getKysely(em)
     .selectFrom("user")
     .where("id", "=", 1)
-    .select(["id", "uuid"])
-    .execute();
+    .select(["id", "uuid"]);
 
+  const [row] = await em.execute<InferResult<typeof query>>(raw(query));
   expect(row!.uuid).toBe(SEED_UUID);
 
   await orm.close(true);
 });
+
